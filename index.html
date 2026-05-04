@@ -18,147 +18,85 @@ h1 {
 }
 
 .login, .app {
-    display: none;
+    text-align: center;
+    margin-top: 50px;
 }
 
-.box {
-    background: rgba(255,255,255,0.1);
-    padding: 15px;
-    border-radius: 10px;
-    margin-top: 20px;
+.app {
+    display: none;
 }
 
 button {
     padding: 10px;
-    margin: 5px;
+    margin: 10px;
     border: none;
     border-radius: 8px;
     cursor: pointer;
 }
 
-.generate { background: #00c6ff; }
-.solve { background: #00ff9d; }
-
 .alert {
-    margin-top: 10px;
+    background: #ff4d4d;
+    margin: 10px;
     padding: 10px;
     border-radius: 10px;
-}
-
-.new {
-    background: #ff4d4d;
 }
 
 .done {
     background: #2ecc71;
 }
 </style>
+
 </head>
 
 <body>
 
 <h1>🚨 نظام إدارة التنبيهات الذكي</h1>
 
-<!-- LOGIN -->
 <div class="login" id="login">
-<div class="box">
 <h3>تسجيل الدخول</h3>
+
 <select id="role">
 <option value="admin">مشرف</option>
 <option value="tech">فني</option>
 </select>
+
 <br>
 <button onclick="login()">دخول</button>
 </div>
-</div>
 
-<!-- APP -->
 <div class="app" id="app">
 
-<div class="box">
-<button class="generate" onclick="generateAlert()">إرسال تنبيه</button>
-</div>
+<button onclick="addAlert()">إرسال تنبيه</button>
 
-<div class="box">
-<h3>📊 التنبيهات</h3>
 <div id="alerts"></div>
-</div>
-
-<div class="box">
-<h3>📈 الإحصائيات</h3>
-<div id="stats"></div>
-</div>
 
 </div>
 
 <script>
 
-let alerts = JSON.parse(localStorage.getItem("alerts")) || [];
-let role = "";
+let alerts = [];
 
 function login() {
-    role = document.getElementById("role").value;
     document.getElementById("login").style.display = "none";
     document.getElementById("app").style.display = "block";
-    render();
 }
 
-function save() {
-    localStorage.setItem("alerts", JSON.stringify(alerts));
-}
-
-function generateAlert() {
-    alerts.push({
-        id: Date.now(),
-        text: "🚨 تنبيه جديد",
-        status: "new"
-    });
-    save();
-    render();
-}
-
-function solveAlert(id) {
-    alerts = alerts.map(a => {
-        if (a.id === id) a.status = "done";
-        return a;
-    });
-    save();
-    render();
-}
-
-function render() {
+function addAlert() {
     let div = document.getElementById("alerts");
-    let stats = document.getElementById("stats");
 
-    div.innerHTML = "";
+    let alert = document.createElement("div");
+    alert.className = "alert";
+    alert.innerHTML = "🚨 تنبيه جديد <button onclick='solve(this)'>حل</button>";
 
-    alerts.forEach(a => {
-
-        if (role === "tech" && a.status === "done") return;
-
-        div.innerHTML += `
-        <div class="alert ${a.status}">
-            ${a.text}
-            <br>
-            الحالة: ${a.status === "new" ? "جديد" : "تم الحل"}
-            <br>
-            ${role === "tech" && a.status === "new"
-                ? <button class="solve" onclick="solveAlert(${a.id})">تم الإصلاح</button>
-                : ""}
-        </div>
-        `;
-    });
-
-    let active = alerts.filter(a => a.status === "new").length;
-    let done = alerts.filter(a => a.status === "done").length;
-
-    stats.innerHTML = `
-    🔴 تنبيهات نشطة: ${active} <br>
-    🟢 تم حلها: ${done}
-    `;
+    div.appendChild(alert);
 }
 
-document.getElementById("login").style.display = "block";
+function solve(btn) {
+    let alert = btn.parentElement;
+    alert.classList.remove("alert");
+    alert.classList.add("done");
+    alert.innerHTML = "✅ تم حل التنبيه";
+}
 
 </script>
 
