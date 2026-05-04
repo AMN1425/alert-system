@@ -10,19 +10,19 @@ body {
     background: linear-gradient(to right, #141e30, #243b55);
     color: white;
     direction: rtl;
+    text-align: center;
     padding: 20px;
 }
 
 h1 {
-    text-align: center;
+    margin-bottom: 20px;
 }
 
-.login, .app {
-    text-align: center;
-    margin-top: 50px;
+#login, #app {
+    margin-top: 30px;
 }
 
-.app {
+#app {
     display: none;
 }
 
@@ -32,6 +32,7 @@ button {
     border: none;
     border-radius: 8px;
     cursor: pointer;
+    font-weight: bold;
 }
 
 .alert {
@@ -52,7 +53,8 @@ button {
 
 <h1>🚨 نظام إدارة التنبيهات الذكي</h1>
 
-<div class="login" id="login">
+<!-- LOGIN -->
+<div id="login">
 <h3>تسجيل الدخول</h3>
 
 <select id="role">
@@ -64,7 +66,8 @@ button {
 <button onclick="login()">دخول</button>
 </div>
 
-<div class="app" id="app">
+<!-- APP -->
+<div id="app">
 
 <button onclick="addAlert()">إرسال تنبيه</button>
 
@@ -74,28 +77,36 @@ button {
 
 <script>
 
-let alerts = [];
+let role = "";
 
 function login() {
+    role = document.getElementById("role").value;
     document.getElementById("login").style.display = "none";
     document.getElementById("app").style.display = "block";
 }
 
 function addAlert() {
-    let div = document.getElementById("alerts");
+    let alertsDiv = document.getElementById("alerts");
 
-    let alert = document.createElement("div");
-    alert.className = "alert";
-    alert.innerHTML = "🚨 تنبيه جديد <button onclick='solve(this)'>حل</button>";
+    let alertBox = document.createElement("div");
+    alertBox.className = "alert";
 
-    div.appendChild(alert);
-}
+    alertBox.innerHTML = "🚨 تنبيه جديد";
 
-function solve(btn) {
-    let alert = btn.parentElement;
-    alert.classList.remove("alert");
-    alert.classList.add("done");
-    alert.innerHTML = "✅ تم حل التنبيه";
+    // زر الحل يظهر فقط للفني
+    if (role === "tech") {
+        let btn = document.createElement("button");
+        btn.innerText = "تم الإصلاح";
+        btn.onclick = function() {
+            alertBox.classList.remove("alert");
+            alertBox.classList.add("done");
+            alertBox.innerHTML = "✅ تم حل التنبيه";
+        };
+        alertBox.appendChild(document.createElement("br"));
+        alertBox.appendChild(btn);
+    }
+
+    alertsDiv.appendChild(alertBox);
 }
 
 </script>
