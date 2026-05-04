@@ -2,15 +2,15 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>Alert System</title>
+<title>Smart Alert System</title>
 
 <style>
 body {
     font-family: Tahoma;
-    background: #111;
+    background: #0f172a;
     color: white;
-    text-align: center;
     direction: rtl;
+    text-align: center;
     padding: 20px;
 }
 
@@ -21,13 +21,24 @@ button {
     margin: 10px;
     cursor: pointer;
 }
+
+.alert {
+    background: red;
+    padding: 10px;
+    margin: 10px;
+}
+
+.done {
+    background: green;
+}
 </style>
 </head>
 
 <body>
 
-<h1>🚨 نظام التنبيهات</h1>
+<h1>🚨 نظام إدارة التنبيهات</h1>
 
+<!-- LOGIN -->
 <div id="login">
 <h3>تسجيل الدخول</h3>
 
@@ -37,26 +48,95 @@ button {
 </select>
 
 <br>
-<button id="loginBtn">دخول</button>
+<button onclick="login()">دخول</button>
 </div>
 
+<!-- APP -->
 <div id="app">
-<h3>تم تسجيل الدخول ✅</h3>
-<button onclick="addAlert()">إرسال تنبيه</button>
+
+<button onclick="logout()">تسجيل خروج</button>
+
+<div id="adminControls" style="display:none;">
+    <button onclick="addAlert()">إرسال تنبيه</button>
+</div>
+
+<h3>التنبيهات</h3>
 <div id="alerts"></div>
+
 </div>
 
 <script>
 
-// ربط الزر بعد تحميل الصفحة
-document.getElementById("loginBtn").addEventListener("click", function () {
-    document.getElementById("login").style.display = "none";
-    document.getElementById("app").style.display = "block";
-});
+let role = "";
+let alerts = JSON.parse(localStorage.getItem("alerts")) || [];
+
+function save(){
+    localStorage.setItem("alerts", JSON.stringify(alerts));
+}
+
+function login(){
+    role = document.getElementById("role").value;
+
+    document.getElementById("login").style.display="none";
+    document.getElementById("app").style.display="block";
+
+    // إظهار زر الإرسال فقط للمشرف
+    if(role === "admin"){
+        document.getElementById("adminControls").style.display="block";
+    } else {
+        document.getElementById("adminControls").style.display="none";
+    }
+
+    render();
+}
+
+function logout(){
+    document.getElementById("app").style.display="none";
+    document.getElementById("login").style.display="block";
+}
 
 function addAlert(){
-    document.getElementById("alerts").innerHTML += "<p>🚨 تنبيه جديد</p>";
+    alerts.push({id: Date.now(), status: "new"});
+    save();
+    render();
 }
+
+function solve(id){
+    alerts = alerts.map(function(a){
+        if(a.id === id){
+            a.status = "done";
+        }
+        return a;
+    });
+    save();
+    render();
+}
+
+function render(){
+    let div = document.getElementById("alerts");
+    div.innerHTML = "";
+
+    alerts.forEach(function(a){
+
+        let box = document.createElement("div");
+        box.className = (a.status === "done") ? "done" : "alert";
+
+        box.innerHTML = "🚨 تنبيه - الحالة: " + (a.status === "new" ? "جديد" : "تم الحل");
+
+        // زر الحل يظهر فقط للفني
+        if(role === "tech" && a.status === "new"){
+            let btn = document.createElement("button");
+            btn.innerText = "حل";
+            btn.onclick = function(){ solve(a.id); };
+            box.appendChild(document.createElement("br"));
+            box.appendChild(btn);
+        }
+
+        div.appendChild(box);
+    });
+}
+
+document.getElementById("login").style.display="block";
 
 </script>
 
