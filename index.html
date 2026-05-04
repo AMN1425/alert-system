@@ -2,30 +2,39 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>Smart Alert System</title>
+<title>نظام التنبيهات</title>
 
 <style>
 body {
     font-family: Tahoma;
-    background: #0f172a;
+    background: linear-gradient(to right, #0f172a, #1e3a8a);
     color: white;
-    direction: rtl;
     text-align: center;
+    direction: rtl;
     padding: 20px;
 }
 
 #app { display: none; }
 
 button {
-    padding: 10px;
+    padding: 10px 20px;
     margin: 10px;
     cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
 }
+
+.login-btn { background: #22c55e; color: white; }
+.logout-btn { background: red; color: white; }
+.alert-btn { background: #3b82f6; color: white; }
+.solve-btn { background: orange; color: white; }
 
 .alert {
     background: red;
     padding: 10px;
     margin: 10px;
+    border-radius: 8px;
 }
 
 .done {
@@ -38,9 +47,9 @@ button {
 
 <h1>🚨 نظام إدارة التنبيهات</h1>
 
-<!-- LOGIN -->
+<!-- تسجيل الدخول -->
 <div id="login">
-<h3>تسجيل الدخول</h3>
+<h3>اختر نوع المستخدم</h3>
 
 <select id="role">
 <option value="admin">مشرف</option>
@@ -48,19 +57,19 @@ button {
 </select>
 
 <br>
-<button onclick="login()">دخول</button>
+<button class="login-btn" onclick="login()">دخول</button>
 </div>
 
-<!-- APP -->
+<!-- النظام -->
 <div id="app">
 
-<button onclick="logout()">تسجيل خروج</button>
+<button class="logout-btn" onclick="logout()">تسجيل خروج</button>
 
 <div id="adminControls" style="display:none;">
-    <button onclick="addAlert()">إرسال تنبيه</button>
+    <button class="alert-btn" onclick="addAlert()">إرسال تنبيه</button>
 </div>
 
-<h3>التنبيهات</h3>
+<h3>📢 التنبيهات</h3>
 <div id="alerts"></div>
 
 </div>
@@ -80,7 +89,6 @@ function login(){
     document.getElementById("login").style.display="none";
     document.getElementById("app").style.display="block";
 
-    // إظهار زر الإرسال فقط للمشرف
     if(role === "admin"){
         document.getElementById("adminControls").style.display="block";
     } else {
@@ -119,13 +127,13 @@ function render(){
     alerts.forEach(function(a){
 
         let box = document.createElement("div");
-        box.className = (a.status === "done") ? "done" : "alert";
+        box.className = (a.status === "done") ? "done alert" : "alert";
 
         box.innerHTML = "🚨 تنبيه - الحالة: " + (a.status === "new" ? "جديد" : "تم الحل");
 
-        // زر الحل يظهر فقط للفني
         if(role === "tech" && a.status === "new"){
             let btn = document.createElement("button");
+            btn.className = "solve-btn";
             btn.innerText = "حل";
             btn.onclick = function(){ solve(a.id); };
             box.appendChild(document.createElement("br"));
@@ -135,8 +143,6 @@ function render(){
         div.appendChild(box);
     });
 }
-
-document.getElementById("login").style.display="block";
 
 </script>
 
