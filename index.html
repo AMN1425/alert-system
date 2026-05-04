@@ -2,166 +2,61 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>Smart Alert System</title>
+<title>Alert System</title>
 
 <style>
 body {
     font-family: Tahoma;
-    background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+    background: #111;
     color: white;
-    direction: rtl;
     text-align: center;
+    direction: rtl;
     padding: 20px;
 }
-
-h1 { margin-bottom: 20px; }
 
 #app { display: none; }
 
 button {
     padding: 10px;
     margin: 10px;
-    border-radius: 8px;
-    border: none;
     cursor: pointer;
-    font-weight: bold;
 }
-
-.alert {
-    background: #e74c3c;
-    padding: 10px;
-    margin: 10px;
-    border-radius: 10px;
-}
-
-.done {
-    background: #2ecc71;
-}
-
-.card {
-    background: rgba(255,255,255,0.1);
-    padding: 15px;
-    border-radius: 15px;
-    margin: 15px;
-}
-
-.stats {
-    font-size: 18px;
-    margin: 10px;
-}
-
-.bar {
-    height: 20px;
-    margin: 5px;
-    border-radius: 10px;
-}
-.red { background: red; }
-.green { background: green; }
 </style>
 </head>
 
 <body>
 
-<h1>🚨 Smart Alert Management System</h1>
+<h1>🚨 نظام التنبيهات</h1>
 
 <div id="login">
 <h3>تسجيل الدخول</h3>
+
 <select id="role">
 <option value="admin">مشرف</option>
 <option value="tech">فني</option>
 </select>
+
 <br>
-<button onclick="login()">دخول</button>
+<button id="loginBtn">دخول</button>
 </div>
 
 <div id="app">
-
-<button onclick="logout()">تسجيل خروج</button>
+<h3>تم تسجيل الدخول ✅</h3>
 <button onclick="addAlert()">إرسال تنبيه</button>
-
-<div class="stats" id="stats"></div>
-
 <div id="alerts"></div>
-
-<div class="card">
-<h3>📊 تحليل الأداء</h3>
-<div id="bars"></div>
-</div>
-
 </div>
 
 <script>
 
-let role = "";
-let alerts = JSON.parse(localStorage.getItem("alerts")) || [];
-
-function save(){
-    localStorage.setItem("alerts", JSON.stringify(alerts));
-}
-
-function login(){
-    role = document.getElementById("role").value;
-    document.getElementById("login").style.display="none";
-    document.getElementById("app").style.display="block";
-    render();
-}
-
-function logout(){
-    document.getElementById("app").style.display="none";
-    document.getElementById("login").style.display="block";
-}
+// ربط الزر بعد تحميل الصفحة
+document.getElementById("loginBtn").addEventListener("click", function () {
+    document.getElementById("login").style.display = "none";
+    document.getElementById("app").style.display = "block";
+});
 
 function addAlert(){
-    alerts.push({id:Date.now(), status:"new"});
-    save();
-    render();
+    document.getElementById("alerts").innerHTML += "<p>🚨 تنبيه جديد</p>";
 }
-
-function solve(id){
-    alerts = alerts.map(a=>{
-        if(a.id===id) a.status="done";
-        return a;
-    });
-    save();
-    render();
-}
-
-function render(){
-    let div=document.getElementById("alerts");
-    let stats=document.getElementById("stats");
-    let bars=document.getElementById("bars");
-
-    div.innerHTML="";
-    bars.innerHTML="";
-
-    alerts.forEach(a=>{
-        if(role==="tech" && a.status==="done") return;
-
-        div.innerHTML+=`
-        <div class="${a.status==="done"?"done":"alert"}">
-        🚨 تنبيه<br>
-        الحالة: ${a.status==="new"?"جديد":"تم الحل"}
-        <br>
-        ${role==="tech" && a.status==="new" ? <button onclick="solve(${a.id})">تم الإصلاح</button>:""}
-        </div>`;
-    });
-
-    let active = alerts.filter(a=>a.status==="new").length;
-    let done = alerts.filter(a=>a.status==="done").length;
-    let total = active + done || 1;
-
-    stats.innerHTML = 🔴 نشط: ${active} | 🟢 تم الحل: ${done};
-
-    // رسم بسيط
-    bars.innerHTML = `
-    <div>نشط</div>
-    <div class="bar red" style="width:${(active/total)*100}%"></div>
-    <div>تم الحل</div>
-    <div class="bar green" style="width:${(done/total)*100}%"></div>
-    `;
-}
-
-document.getElementById("login").style.display="block";
 
 </script>
 
