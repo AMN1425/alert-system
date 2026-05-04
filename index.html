@@ -4,60 +4,82 @@
 <meta charset="UTF-8">
 <title>Smart Alert System</title>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 body {
     font-family: Tahoma;
-    background: #0f172a;
+    background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
     color: white;
     direction: rtl;
     text-align: center;
     padding: 20px;
 }
 
+h1 { margin-bottom: 20px; }
+
 #app { display: none; }
 
 button {
     padding: 10px;
     margin: 10px;
+    border-radius: 8px;
+    border: none;
     cursor: pointer;
+    font-weight: bold;
 }
 
 .alert {
-    background: red;
-    margin: 10px;
+    background: #e74c3c;
     padding: 10px;
+    margin: 10px;
+    border-radius: 10px;
 }
 
 .done {
-    background: green;
+    background: #2ecc71;
+}
+
+.card {
+    background: rgba(255,255,255,0.1);
+    padding: 15px;
+    border-radius: 15px;
+    margin: 15px;
+}
+
+.stats {
+    font-size: 18px;
+    margin: 10px;
 }
 </style>
-
 </head>
 
 <body>
 
-<h1>🚨 نظام التنبيهات</h1>
+<h1>🚨 Smart Alert Management System</h1>
 
 <div id="login">
 <h3>تسجيل الدخول</h3>
-
 <select id="role">
 <option value="admin">مشرف</option>
 <option value="tech">فني</option>
 </select>
-
 <br>
 <button onclick="login()">دخول</button>
 </div>
 
 <div id="app">
 
+<button onclick="logout()">تسجيل خروج</button>
 <button onclick="addAlert()">إرسال تنبيه</button>
+
+<div class="stats" id="stats"></div>
 
 <div id="alerts"></div>
 
-<p id="stats"></p>
+<div class="card">
+<canvas id="chart"></canvas>
+</div>
 
 </div>
 
@@ -65,75 +87,83 @@ button {
 
 let role = "";
 let alerts = JSON.parse(localStorage.getItem("alerts")) || [];
+let chart;
 
-function save() {
+function save(){
     localStorage.setItem("alerts", JSON.stringify(alerts));
 }
 
-function login() {
+function login(){
     role = document.getElementById("role").value;
-    document.getElementById("login").style.display = "none";
-    document.getElementById("app").style.display = "block";
+    document.getElementById("login").style.display="none";
+    document.getElementById("app").style.display="block";
     render();
 }
 
-function addAlert() {
-    alerts.push({ id: Date.now(), status: "new" });
+function logout(){
+    document.getElementById("app").style.display="none";
+    document.getElementById("login").style.display="block";
+}
+
+function addAlert(){
+    alerts.push({id:Date.now(), status:"new"});
     save();
     render();
 }
 
-function solve(id) {
-    alerts = alerts.map(function(a) {
-        if (a.id === id) {
-            a.status = "done";
-        }
+function solve(id){
+    alerts = alerts.map(a=>{
+        if(a.id===id) a.status="done";
         return a;
     });
     save();
     render();
 }
 
-function render() {
-    var div = document.getElementById("alerts");
-    var stats = document.getElementById("stats");
+function render(){
+    let div=document.getElementById("alerts");
+    let stats=document.getElementById("stats");
 
-    div.innerHTML = "";
+    div.innerHTML="";
 
-    for (var i = 0; i < alerts.length; i++) {
-        var a = alerts[i];
+    alerts.forEach(a=>{
+        if(role==="tech" && a.status==="done") return;
 
-        if (role === "tech" && a.status === "done") {
-            continue;
-        }
+        div.innerHTML+=`
+        <div class="${a.status==="done"?"done":"alert"}">
+        🚨 تنبيه<br>
+        الحالة: ${a.status==="new"?"جديد":"تم الحل"}
+        <br>
+        ${role==="tech" && a.status==="new" ? <button onclick="solve(${a.id})">تم الإصلاح</button>:""}
+        </div>`;
+    });
 
-        var box = document.createElement("div");
-        box.className = (a.status === "done") ? "done" : "alert";
+    let active = alerts.filter(a=>a.status==="new").length;
+    let done = alerts.filter(a=>a.status==="done").length;
 
-        box.innerHTML = "🚨 تنبيه<br>الحالة: " + (a.status === "new" ? "جديد" : "تم الحل");
+    stats.innerHTML = 🔴 نشط: ${active} | 🟢 تم الحل: ${done};
 
-        if (role === "tech" && a.status === "new") {
-            var btn = document.createElement("button");
-            btn.innerText = "تم الإصلاح";
-            btn.onclick = (function(id) {
-                return function() {
-                    solve(id);
-                };
-            })(a.id);
-            box.appendChild(document.createElement("br"));
-            box.appendChild(btn);
-        }
-
-        div.appendChild(box);
-    }
-
-    var active = alerts.filter(a => a.status === "new").length;
-    var done = alerts.filter(a => a.status === "done").length;
-
-    stats.innerHTML = "🔴 نشط: " + active + " | 🟢 تم الحل: " + done;
+    drawChart(active, done);
 }
 
-document.getElementById("login").style.display = "block";
+function drawChart(active, done){
+    let ctx=document.getElementById("chart");
+
+    if(chart) chart.destroy();
+
+    chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['نشط', 'تم الحل'],
+            datasets: [{
+                data: [active, done],
+                backgroundColor: ['red', 'green']
+            }]
+        }
+    });
+}
+
+document.getElementById("login").style.display="block";
 
 </script>
 
