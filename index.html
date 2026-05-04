@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <title>Smart Alert System</title>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <style>
 body {
     font-family: Tahoma;
@@ -51,6 +49,14 @@ button {
     font-size: 18px;
     margin: 10px;
 }
+
+.bar {
+    height: 20px;
+    margin: 5px;
+    border-radius: 10px;
+}
+.red { background: red; }
+.green { background: green; }
 </style>
 </head>
 
@@ -78,7 +84,8 @@ button {
 <div id="alerts"></div>
 
 <div class="card">
-<canvas id="chart"></canvas>
+<h3>📊 تحليل الأداء</h3>
+<div id="bars"></div>
 </div>
 
 </div>
@@ -87,7 +94,6 @@ button {
 
 let role = "";
 let alerts = JSON.parse(localStorage.getItem("alerts")) || [];
-let chart;
 
 function save(){
     localStorage.setItem("alerts", JSON.stringify(alerts));
@@ -123,8 +129,10 @@ function solve(id){
 function render(){
     let div=document.getElementById("alerts");
     let stats=document.getElementById("stats");
+    let bars=document.getElementById("bars");
 
     div.innerHTML="";
+    bars.innerHTML="";
 
     alerts.forEach(a=>{
         if(role==="tech" && a.status==="done") return;
@@ -140,27 +148,17 @@ function render(){
 
     let active = alerts.filter(a=>a.status==="new").length;
     let done = alerts.filter(a=>a.status==="done").length;
+    let total = active + done || 1;
 
     stats.innerHTML = 🔴 نشط: ${active} | 🟢 تم الحل: ${done};
 
-    drawChart(active, done);
-}
-
-function drawChart(active, done){
-    let ctx=document.getElementById("chart");
-
-    if(chart) chart.destroy();
-
-    chart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['نشط', 'تم الحل'],
-            datasets: [{
-                data: [active, done],
-                backgroundColor: ['red', 'green']
-            }]
-        }
-    });
+    // رسم بسيط
+    bars.innerHTML = `
+    <div>نشط</div>
+    <div class="bar red" style="width:${(active/total)*100}%"></div>
+    <div>تم الحل</div>
+    <div class="bar green" style="width:${(done/total)*100}%"></div>
+    `;
 }
 
 document.getElementById("login").style.display="block";
