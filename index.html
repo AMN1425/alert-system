@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>Smart Alert System</title>
+
+<style>
+body {
+    font-family: Tahoma;
+    background: linear-gradient(to right, #141e30, #243b55);
+    color: white;
+    direction: rtl;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+}
+
+.login, .app {
+    display: none;
+}
+
+.box {
+    background: rgba(255,255,255,0.1);
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+button {
+    padding: 10px;
+    margin: 5px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.generate { background: #00c6ff; }
+.solve { background: #00ff9d; }
+
+.alert {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.new {
+    background: #ff4d4d;
+}
+
+.done {
+    background: #2ecc71;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🚨 نظام إدارة التنبيهات الذكي</h1>
+
+<!-- LOGIN -->
+<div class="login" id="login">
+<div class="box">
+<h3>تسجيل الدخول</h3>
+<select id="role">
+<option value="admin">مشرف</option>
+<option value="tech">فني</option>
+</select>
+<br>
+<button onclick="login()">دخول</button>
+</div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+
+<div class="box">
+<button class="generate" onclick="generateAlert()">إرسال تنبيه</button>
+</div>
+
+<div class="box">
+<h3>📊 التنبيهات</h3>
+<div id="alerts"></div>
+</div>
+
+<div class="box">
+<h3>📈 الإحصائيات</h3>
+<div id="stats"></div>
+</div>
+
+</div>
+
+<script>
+
+let alerts = JSON.parse(localStorage.getItem("alerts")) || [];
+let role = "";
+
+function login() {
+    role = document.getElementById("role").value;
+    document.getElementById("login").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    render();
+}
+
+function save() {
+    localStorage.setItem("alerts", JSON.stringify(alerts));
+}
+
+function generateAlert() {
+    alerts.push({
+        id: Date.now(),
+        text: "🚨 تنبيه جديد",
+        status: "new"
+    });
+    save();
+    render();
+}
+
+function solveAlert(id) {
+    alerts = alerts.map(a => {
+        if (a.id === id) a.status = "done";
+        return a;
+    });
+    save();
+    render();
+}
+
+function render() {
+    let div = document.getElementById("alerts");
+    let stats = document.getElementById("stats");
+
+    div.innerHTML = "";
+
+    alerts.forEach(a => {
+
+        if (role === "tech" && a.status === "done") return;
+
+        div.innerHTML += `
+        <div class="alert ${a.status}">
+            ${a.text}
+            <br>
+            الحالة: ${a.status === "new" ? "جديد" : "تم الحل"}
+            <br>
+            ${role === "tech" && a.status === "new"
+                ? <button class="solve" onclick="solveAlert(${a.id})">تم الإصلاح</button>
+                : ""}
+        </div>
+        `;
+    });
+
+    let active = alerts.filter(a => a.status === "new").length;
+    let done = alerts.filter(a => a.status === "done").length;
+
+    stats.innerHTML = `
+    🔴 تنبيهات نشطة: ${active} <br>
+    🟢 تم حلها: ${done}
+    `;
+}
+
+document.getElementById("login").style.display = "block";
+
+</script>
+
+</body>
+</html>
